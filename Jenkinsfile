@@ -16,19 +16,19 @@ pipeline{
         }
         stage("Deployment to Dev"){
             steps{
-                params.EnvirName
+                echo params.EnvirName
                 echo "dev deployment"
             }
         } 
         stage("Deployment to Test"){
             steps{
-                params.EnvirName
+                echo params.EnvirName
                 echo "Test deployment"
             }
         } 
         stage("Deployment to Prod"){
             steps{
-                params.EnvirName
+                echo params.EnvirName
                 echo "PROD deployment"
             }
         }
