@@ -11,7 +11,7 @@ pipeline{
         }
         stage("Deployment to Dev"){
             when{
-                expression {params.EnvirName == 'dev'}
+                expression {params.EnvirName == 'Dev'}
             }
             steps{
                 echo params.EnvirName
@@ -20,7 +20,7 @@ pipeline{
         } 
         stage("Deployment to Test"){
             when{
-                expression { params.EnvirName == 'test'}
+                expression { params.EnvirName == 'Test'}
             }
             steps{
                 echo params.EnvirName
@@ -29,7 +29,7 @@ pipeline{
         } 
         stage("Deployment to Prod"){
             when{
-                expression { params.EnvirName == 'prod'}
+                expression { params.EnvirName == 'Prod'}
             }
             steps{
                 echo params.EnvirName
