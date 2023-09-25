@@ -1,5 +1,8 @@
 pipeline{
     agent any
+    parameters {
+      choice choices: ['Dev', 'Test', 'Prod'], description: 'Passing envi details using Parameters', name: 'EnvirName'
+    }
     stages{
         stage("git checkout"){
             steps{
@@ -11,13 +14,22 @@ pipeline{
                 sh "mvn clean package"
             }
         }
-        stage("Web deployment"){
+        stage("Deployment to Dev"){
             steps{
-                sshagent(['SSH-tomcat-server']) {
-                    sh "scp -o StrictHostKeyChecking=no target/doctor-online.war ec2-user@172.31.13.133:/opt/tomcat9/webapps/"
-                    sh "ssh ec2-user@172.31.13.133 /opt/tomcat9/bin/shutdown.sh"
-                    sh "ssh ec2-user@172.31.13.133 /opt/tomcat9/bin/startup.sh"
-                }
+                params.EnvirName
+                echo "dev deployment"
+            }
+        } 
+        stage("Deployment to Test"){
+            steps{
+                params.EnvirName
+                echo "Test deployment"
+            }
+        } 
+        stage("Deployment to Prod"){
+            steps{
+                params.EnvirName
+                echo "PROD deployment"
             }
         }
     }
