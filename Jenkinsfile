@@ -3,20 +3,20 @@ pipeline{
     parameters {
       choice choices: ['Dev', 'Test', 'Prod'], description: 'Passing envi details using Parameters', name: 'EnvirName'
     }
+    environment {
+        nexus_url = "172.31.22.124:8081"
+    }
     
     stages{
         stage("maven buld"){
             when{
-                expression {params.EnvirName == 'Dev'}
-            } 
+                expression{params.EnvirName == 'Dev'}
+            }
             steps{
                 sh "mvn clean package"
             }
         }
         stage("Upload artifacts to Nexus"){
-            when{
-                expression {params.EnvirName == 'Dev'}
-            }
             steps{
                 script{
                     def pom = readMavenPom file: 'pom.xml'
@@ -28,9 +28,22 @@ pipeline{
                     nexusArtifactUploader artifacts: [[artifactId: 'doctor-online', 
                     classifier: '', file: 'target/doctor-online.war',
                     type: 'war']], credentialsId: 'nexus3', groupId: 'in.javahome',
-                    nexusUrl: '3.21.39.182:8081',
+                    nexusUrl: env.nexus_url,
                     nexusVersion: 'nexus3', protocol: 'http',
                     repository: repoName, version: ver
+                }
+            }
+        }
+        stage("Download artifacts from Nexus"){
+            steps{
+                script{
+                    withCredentials([usernameColonPassword(credentialsId: 'nexus3', variable: 'USERPASS')]){
+                        def pom = readMavenPom file: 'pom.xml'
+                        def ver = pom.version 
+                        sh """
+                            curl -o doctor-online.war -u $USERPASS -X GET "${env.nexus_url}/repository/doctor-online-release/in/javahome/doctor-online/${ver}/doctor-online-${ver}.war"
+                        """
+                    }  
                 }
             }
         }
