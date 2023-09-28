@@ -1,3 +1,4 @@
+@Library('jenkins_shared_libs') _
 pipeline{
     agent any
     parameters {
@@ -9,9 +10,6 @@ pipeline{
     
     stages{
         stage("maven buld"){
-            when{
-                expression{params.EnvirName == 'Dev'}
-            }
             steps{
                 sh "mvn clean package"
             }
@@ -19,18 +17,7 @@ pipeline{
         stage("Upload artifacts to Nexus"){
             steps{
                 script{
-                    def pom = readMavenPom file: 'pom.xml'
-                    def ver = pom.version
-                    def repoName = 'doctor-online-release'
-                    if(ver.endsWith("SNAPSHOT")){
-                        repoName = 'doctor-online-snapshot'                        
-                    }
-                    nexusArtifactUploader artifacts: [[artifactId: 'doctor-online', 
-                    classifier: '', file: 'target/doctor-online.war',
-                    type: 'war']], credentialsId: 'nexus3', groupId: 'in.javahome',
-                    nexusUrl: env.nexus_url,
-                    nexusVersion: 'nexus3', protocol: 'http',
-                    repository: repoName, version: ver
+                    upload_artifacts_nexus()
                 }
             }
         }
@@ -38,11 +25,12 @@ pipeline{
             steps{
                 script{
                     withCredentials([usernameColonPassword(credentialsId: 'nexus3', variable: 'USERPASS')]){
-                        def pom = readMavenPom file: 'pom.xml'
-                        def ver = pom.version 
-                        sh """
-                            curl -o doctor-online.war -u $USERPASS -X GET "${env.nexus_url}/repository/doctor-online-release/in/javahome/doctor-online/${ver}/doctor-online-${ver}.war"
-                        """
+                        nexus_download_artifacts('doctor-online.war','in.javahome', 'doctor-online','doctor-online-snapshot' )
+                        // def pom = readMavenPom file: 'pom.xml'
+                        // def ver = pom.version 
+                        // sh """
+                        //     curl -o doctor-online.war -u $USERPASS -X GET "${env.nexus_url}/repository/doctor-online-release/in/javahome/doctor-online/${ver}/doctor-online-${ver}.war"
+                        // """
                     }  
                 }
             }
@@ -70,6 +58,9 @@ pipeline{
                 expression { params.EnvirName == 'Prod'}
             }
             steps{
+                sshagent(['SSH-tomcat-server']) {
+                    sh "scp -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/pipeline-with-parameters/doctor-online.war ec2-user@172.31.13.133:/opt/tomcat9/webapps/"
+                }
                 echo params.EnvirName
                 echo "PROD deployment"
             }
