@@ -1,0 +1,34 @@
+pipeline{
+  agent any
+  stages(){
+    stage("Maven build"){
+      steps{
+        echo "Maven build success"
+      }
+    }
+    stage("Deploy to Dev"){
+      when{
+        branch 'dev'
+      }
+      steps{
+        echo "Deploy tot Dev ....."
+      }
+    }
+    stage("Deploy to Test"){
+      when{
+        branch 'test'
+      }
+      steps{
+        echo "Deploy tot Test ...."
+      }
+    }
+    stage("Deploy to Prod"){
+      when{
+        branch 'main'
+      }
+      steps{
+        echo "Deploy tot Prod ...."
+      }
+    }    
+  }
+}
