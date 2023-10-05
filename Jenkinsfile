@@ -59,7 +59,10 @@ pipeline{
             }
             steps{
                 sshagent(['SSH-tomcat-server']) {
-                    sh "scp -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/pipeline-with-parameters/doctor-online.war ec2-user@172.31.13.133:/opt/tomcat9/webapps/"
+                    sh "scp -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/checkout_deployments/doctor-online.war ec2-user@172.31.13.133:/opt/tomcat9/webapps/"
+                    sh "ssh ec2-user@172.31.13.133 /opt/tomcat9/bin/shutdown.sh"
+                     sh "ssh ec2-user@172.31.13.133 /opt/tomcat9/bin/startup.sh"
+                    
                 }
                 echo params.EnvirName
                 echo "PROD deployment"
