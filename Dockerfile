@@ -8,5 +8,8 @@ RUN mvn clean package
 
 # Stage 2: Deploy to Tomcat
 FROM tomcat:9.0-jre11-slim
-COPY --from=build /app/target/doctor-online.war /opt/tomcat9/webapps/
+COPY --from=build /app/target/doctor-online.war /usr/local/tomcat/webapps/
 EXPOSE 8080
+
+# Restart Tomcat
+CMD ["catalina.sh", "run"]
