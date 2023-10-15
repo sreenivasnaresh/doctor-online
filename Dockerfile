@@ -9,7 +9,7 @@ RUN mvn clean package
 FROM openjdk:11-jre-slim
 WORKDIR /app
 COPY --from=build /app/target/*.war /app/myapp.war
-EXPOSE 8080
+EXPOSE 8090
 CMD ["java", "-jar", "myapp.jar"]
 
 
