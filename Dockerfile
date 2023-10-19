@@ -1,5 +1,10 @@
-FROM jenkins/jenkins:lts
+FROM jenkins/jenkins:latest
+
+USER root
+
 RUN apt-get update && apt-get install -y maven
+
+USER naresh_kumar
 
 # Second stage: build the application with Maven
 FROM maven:3.8.3-openjdk-17 AS builder
